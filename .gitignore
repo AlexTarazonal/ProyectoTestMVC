@@ -1,0 +1,16 @@
+# Visual Studio / ASP.NET Core
+bin/
+obj/
+.vs/
+launchSettings.json
+
+# Configuración sensible
+appsettings.json
+appsettings.Development.json
+secrets.json
+
+# User Secrets folder (opcional)
+*.usersecrets
+
+# Otros
+*.log
