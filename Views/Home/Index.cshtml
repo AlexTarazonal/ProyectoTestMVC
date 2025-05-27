@@ -1,8 +1,100 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model ProyectoTestMVC.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard Inventario";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building W.NET Core</a>.</p>
+<div class="container my-5">
+    <h1 class="mb-4">Panel de Control</h1>
+
+    <!-- Métricas rápidas -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Productos</h5>
+                    <p class="card-text display-6">@Model.TotalProducts</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Categorías</h5>
+                    <p class="card-text display-6">@Model.TotalCategories</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Almacenes</h5>
+                    <p class="card-text display-6">@Model.TotalWarehouses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Proveedores</h5>
+                    <p class="card-text display-6">@Model.TotalProviders</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alertas de bajo stock -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    Alertas de Bajo Stock
+                </div>
+                <div class="card-body">
+                    <h3>@Model.LowStockAlerts</h3>
+                    <p>productos por debajo del mínimo</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Últimas Transacciones -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    Últimas Transacciones
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Producto</th>
+                                <th>Almacén</th>
+                                <th>Cant.</th>
+                                <th>Tipo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tx in Model.RecentTransactions)
+                        {
+                            <tr>
+                                <td>@tx.OccurredAt.ToString("g")</td>
+                                <td>@tx.ProductName</td>
+                                <td>@tx.WarehouseName</td>
+                                <td>@tx.Quantity</td>
+                                <td>@tx.Type</td>
+                            </tr>
+                        }
+                            @if (!Model.RecentTransactions.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center">No hay transacciones recientes.</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

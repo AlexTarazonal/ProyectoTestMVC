@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\ProyectoTestMVC\\ProyectoTestMVC.csproj": {}
+    "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\proyectotestmvc\\ProyectoTestMVC.csproj": {}
   },
   "projects": {
-    "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\ProyectoTestMVC\\ProyectoTestMVC.csproj": {
+    "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\proyectotestmvc\\ProyectoTestMVC.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\ProyectoTestMVC\\ProyectoTestMVC.csproj",
+        "projectUniqueName": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\proyectotestmvc\\ProyectoTestMVC.csproj",
         "projectName": "ProyectoTestMVC",
-        "projectPath": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\ProyectoTestMVC\\ProyectoTestMVC.csproj",
+        "projectPath": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\proyectotestmvc\\ProyectoTestMVC.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\ProyectoTestMVC\\obj\\",
+        "outputPath": "C:\\Users\\User\\Desktop\\diseño arqui\\proyecto_inventario\\proyectotestmvc\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -26,5 +26,7 @@ namespace ProyectoTestMVC.Models
 
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
+
+        public ICollection<Transaction> TransactionsCreated { get; set; } = new List<Transaction>();
     }
 }

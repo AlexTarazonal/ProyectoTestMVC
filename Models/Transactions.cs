@@ -15,11 +15,20 @@ namespace ProyectoTestMVC.Models
         [Column("product_id")]
         public int ProductId { get; set; }
 
+        // Navegación a Product
+        [ForeignKey(nameof(ProductId))]
+        public Product Product { get; set; } = null!;
+
         [Column("warehouse_id")]
         public int WarehouseId { get; set; }
 
+        // Navegación a Warehouse
+        [ForeignKey(nameof(WarehouseId))]
+        public Warehouse Warehouse { get; set; } = null!;
+
         [Column("provider_id")]
         public int? ProviderId { get; set; }
+        public Provider? Provider { get; set; }
 
         [Column("quantity")]
         public int Quantity { get; set; }
@@ -32,6 +41,7 @@ namespace ProyectoTestMVC.Models
 
         [Column("created_by")]
         public int? CreatedBy { get; set; }
+        public User? CreatedByUser { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }

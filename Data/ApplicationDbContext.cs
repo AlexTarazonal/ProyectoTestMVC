@@ -22,12 +22,33 @@ namespace ProyectoTestMVC.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Aplica snake_case a tablas y columnas
-           
-
-            // Mapea la clave compuesta de Stock
+            // Stock (ya lo tenías)
             modelBuilder.Entity<Stock>()
-                        .HasKey(s => new { s.ProductId, s.WarehouseId });
+                .HasKey(s => new { s.ProductId, s.WarehouseId });
+
+            // Transaction → Product (1:N)
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Product)
+                .WithMany(p => p.Transactions)   // deja p.Transactions en tu modelo Product
+                .HasForeignKey(t => t.ProductId);
+
+            // Transaction → Warehouse (1:N)
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Warehouse)
+                .WithMany(w => w.Transactions)   // deja w.Transactions en tu modelo Warehouse
+                .HasForeignKey(t => t.WarehouseId);
+
+            // Transaction → Provider (opcional)
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.Provider)
+                .WithMany(p => p.Transactions)
+                .HasForeignKey(t => t.ProviderId);
+
+            // Transaction → CreatedByUser (opcional)
+            modelBuilder.Entity<Transaction>()
+                .HasOne(t => t.CreatedByUser)
+                .WithMany(u => u.TransactionsCreated)
+                .HasForeignKey(t => t.CreatedBy);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProyectoTestMVC.Models
@@ -26,5 +27,7 @@ namespace ProyectoTestMVC.Models
 
         [Column("updated_at")]
         public DateTime UpdatedAt { get; set; }
+
+        public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 }
