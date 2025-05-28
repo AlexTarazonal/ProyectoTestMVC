@@ -256,9 +256,7 @@ C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debu
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ProyectoTestMVC.RazorAssemblyInfo.cache
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ProyectoTestMVC.RazorAssemblyInfo.cs
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ProyectoTestMVC.sourcelink.json
-C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\scopedcss\Views\Shared\_Layout.cshtml.rz.scp.css
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\scopedcss\bundle\ProyectoTestMVC.styles.css
-C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\scopedcss\projectbundle\ProyectoTestMVC.bundle.scp.css
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\h9pd6eqycw-b9sayid5wm.gz
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\1rfy8gcwo9-61n19gt1b8.gz
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\jcmcgmmtkf-xtxxf3hu2r.gz
@@ -331,5 +329,4 @@ C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debu
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ProyectoTestMVC.pdb
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ProyectoTestMVC.genruntimeconfig.cache
 C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\ref\ProyectoTestMVC.dll
-C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\osjvi1e5aa-u5ardh1crr.gz
-C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\9qapgr2ib4-u5ardh1crr.gz
+C:\Users\User\Desktop\diseño arqui\proyecto_inventario\proyectotestmvc\obj\Debug\net9.0\compressed\n61cdpiutq-sprlwoa5nz.gz

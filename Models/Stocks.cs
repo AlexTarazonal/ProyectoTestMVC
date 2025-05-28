@@ -8,9 +8,11 @@ namespace ProyectoTestMVC.Models
     {
         [Column("product_id")]
         public int ProductId { get; set; }
+        public Product? Product { get; set; }
 
         [Column("warehouse_id")]
         public int WarehouseId { get; set; }
+        public Warehouse? Warehouse { get; set; }
 
         [Column("quantity")]
         public int Quantity { get; set; }

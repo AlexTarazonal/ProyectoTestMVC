@@ -1,65 +1,73 @@
 @model IEnumerable<ProyectoTestMVC.Models.User>
 
-@{
-    ViewData["Title"] = "Index";
-}
+    @{
+    ViewData["Title"] = "Usuarios";
+    }
 
-<h1>Index</h1>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Usuarios</h1>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fa fa-plus me-1"></i> Nuevo Usuario
+            </a>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PasswordHash)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastLogin)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PasswordHash)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsActive)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LastLogin)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Email</th>
+                                <th>Activo</th>
+                                <th>Último Login</th>
+                                <th>Creado</th>
+                                <th>Actualizado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var usr in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-action="Details" asp-route-id="@usr.Id" class="link-primary">
+                                        @usr.Email
+                                    </a>
+                                </td>
+                                <td>
+                                    @if (usr.IsActive)
+                                    {
+                                    <span class="badge bg-success">Sí</span>
+                                    }
+                                    else
+                                    {
+                                    <span class="badge bg-secondary">No</span>
+                                    }
+                                </td>
+                                <td>
+                                    @usr.LastLogin?.ToString("g") ?? "<em>–</em>"
+                                </td>
+                                <td>@usr.CreatedAt.ToString("g")</td>
+                                <td>@usr.UpdatedAt.ToString("g")</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit" asp-route-id="@usr.Id" class="btn btn-outline-primary" title="Editar">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Details" asp-route-id="@usr.Id" class="btn btn-outline-info" title="Ver">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@usr.Id" class="btn btn-outline-danger" title="Eliminar">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>

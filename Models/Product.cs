@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Models/Product.cs
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProyectoTestMVC.Models
@@ -26,16 +28,15 @@ namespace ProyectoTestMVC.Models
 
         [Column("category_id")]
         public int CategoryId { get; set; }
+        public Category? Category { get; set; }
 
         [Column("minimum_stock")]
         public int MinimumStock { get; set; }
 
-        [Column("created_at")]
-        public DateTime CreatedAt { get; set; }
+        // Navegación a Stocks
+        public ICollection<Stock> Stocks { get; set; } = new List<Stock>();
 
-        [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; }
-
+        // Navegación a Transactions
         public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
     }
 }

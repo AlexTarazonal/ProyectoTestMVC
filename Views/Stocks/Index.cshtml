@@ -1,47 +1,68 @@
 @model IEnumerable<ProyectoTestMVC.Models.Stock>
 
-@{
-    ViewData["Title"] = "Index";
-}
+    @{
+    ViewData["Title"] = "Movimientos de Stock";
+    }
 
-<h1>Index</h1>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Movimientos de Stock</h1>
+            <a asp-action="Create" class="btn btn-success">
+                <i class="fa fa-plus me-1"></i> Nuevo Movimiento
+            </a>
+        </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Quantity)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Quantity)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.ActionLink("Edit", "Edit", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Details", "Details", new { /* id=item.PrimaryKey */ }) |
-                @Html.ActionLink("Delete", "Delete", new { /* id=item.PrimaryKey */ })
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cantidad</th>
+                                <th>Creado</th>
+                                <th>Actualizado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var stk in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="fw-semibold">@stk.Quantity</span>
+                                </td>
+                                <td>@stk.CreatedAt.ToString("g")</td>
+                                <td>@stk.UpdatedAt.ToString("g")</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a asp-action="Edit"
+                                           asp-route-productId="@stk.ProductId"
+                                           asp-route-warehouseId="@stk.WarehouseId"
+                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
+                                           class="btn btn-outline-primary" title="Editar">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Details"
+                                           asp-route-productId="@stk.ProductId"
+                                           asp-route-warehouseId="@stk.WarehouseId"
+                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
+                                           class="btn btn-outline-info" title="Ver">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                        <a asp-action="Delete"
+                                           asp-route-productId="@stk.ProductId"
+                                           asp-route-warehouseId="@stk.WarehouseId"
+                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
+                                           class="btn btn-outline-danger" title="Eliminar">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
