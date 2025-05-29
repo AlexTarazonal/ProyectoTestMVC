@@ -1,76 +1,429 @@
 @model IEnumerable<ProyectoTestMVC.Models.Transaction>
-
     @{
     ViewData["Title"] = "Transacciones";
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Transacciones</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fa fa-plus me-1"></i> Nueva Transacción
-            </a>
-        </div>
+    <!-- Estilos CSS adicionales -->
+    <style>
+        .transaction-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 2rem;
+            margin-bottom: 0;
+        }
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Producto</th>
-                                <th>Almacén</th>
-                                <th>Proveedor</th>
-                                <th class="text-center">Cantidad</th>
-                                <th>Tipo</th>
-                                <th>Cliente</th>
-                                <th>Usuario</th>
-                                <th>Creado</th>
-                                <th>Actualizado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var tx in Model)
-                        {
-                            <tr>
-                                <td>@tx.OccurredAt.ToString("g")</td>
-                                <td>@tx.ProductId</td>
-                                <td>@tx.WarehouseId</td>
-                                <td>@tx.ProviderId</td>
-                                <td class="text-center">
-                                    <span class="fw-semibold">@tx.Quantity</span>
-                                </td>
-                                <td>
-                                    <span class="badge @(tx.Type == "Ingreso" ? "bg-success" : "bg-danger") text-uppercase">
-                                        @tx.Type
-                                    </span>
-                                </td>
-                                <td class="text-truncate" style="max-width: 150px;">
-                                    @tx.ClientName
-                                </td>
-                                <td>@tx.CreatedBy</td>
-                                <td>@tx.CreatedAt.ToString("g")</td>
-                                <td>@tx.UpdatedAt.ToString("g")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit" asp-route-id="@tx.Id" class="btn btn-outline-primary" title="Editar">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@tx.Id" class="btn btn-outline-info" title="Ver">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@tx.Id" class="btn btn-outline-danger" title="Eliminar">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+        .stats-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            color: white;
+        }
+
+        .stats-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stats-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .search-filter-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            padding: 1rem 0.75rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+            .table tbody tr:hover {
+                background-color: #f8f9fa;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            }
+
+        .table tbody td {
+            padding: 1rem 0.75rem;
+            border-top: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+        .transaction-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-action {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 2px;
+            transition: all 0.2s ease;
+        }
+
+            .btn-action:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            }
+
+        .quantity-display {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-weight: 600;
+            display: inline-block;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .date-display {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .user-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6c757d;
+        }
+
+            .empty-state i {
+                font-size: 4rem;
+                margin-bottom: 1rem;
+                opacity: 0.5;
+            }
+
+        @@media (max-width: 768px) {
+            .transaction-header {
+                padding: 1rem;
+                text-align: center;
+            }
+
+            .stats-card {
+                margin-bottom: 1rem;
+            }
+
+            .table-responsive {
+                border-radius: 10px;
+            }
+
+            .btn-action {
+                width: 30px;
+                height: 30px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+
+    <div class="container-fluid py-4">
+        <!-- Header con estadísticas -->
+        <div class="transaction-header">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h2 mb-2">
+                        <i class="fa fa-exchange-alt me-2"></i>
+                        Gestión de Transacciones
+                    </h1>
+                    <p class="mb-0 opacity-75">Administra todas las transacciones de inventario</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="row g-3">
+                        <div class="col-6 col-sm-4">
+                            <div class="stats-card">
+                                <span class="stats-number">@Model.Count()</span>
+                                <span class="stats-label">Total</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-4">
+                            <div class="stats-card">
+                                <span class="stats-number">@Model.Count(t => t.Type == "Ingreso")</span>
+                                <span class="stats-label">Ingresos</span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-4">
+                            <div class="stats-card">
+                                <span class="stats-number">@Model.Count(t => t.Type == "Egreso")</span>
+                                <span class="stats-label">Egresos</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Sección de filtros y búsqueda -->
+        <div class="search-filter-section">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">
+                        <i class="fa fa-search me-1"></i>Buscar
+                    </label>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar por producto, cliente, usuario...">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Tipo</label>
+                    <select class="form-select" id="typeFilter">
+                        <option value="">Todos</option>
+                        <option value="Ingreso">Ingresos</option>
+                        <option value="Egreso">Egresos</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Desde</label>
+                    <input type="date" class="form-control" id="dateFrom">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-semibold">Hasta</label>
+                    <input type="date" class="form-control" id="dateTo">
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                        <i class="fa fa-times me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botón de nueva transacción -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="text-muted" id="recordCount">Mostrando @Model.Count() transacciones</span>
+            </div>
+            <a asp-action="Create" class="btn btn-success btn-lg shadow">
+                <i class="fa fa-plus me-2"></i>Nueva Transacción
+            </a>
+        </div>
+
+        <!-- Tabla de transacciones -->
+        <div class="table-container">
+            <div class="table-responsive">
+                @if (Model.Any())
+            {
+                <table class="table table-hover align-middle mb-0" id="transactionsTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fa fa-calendar me-1"></i>Fecha</th>
+                            <th><i class="fa fa-box me-1"></i>Producto</th>
+                            <th><i class="fa fa-warehouse me-1"></i>Almacén</th>
+                            <th><i class="fa fa-truck me-1"></i>Proveedor</th>
+                            <th class="text-center"><i class="fa fa-hashtag me-1"></i>Cantidad</th>
+                            <th class="text-center"><i class="fa fa-tag me-1"></i>Tipo</th>
+                            <th><i class="fa fa-user me-1"></i>Cliente</th>
+                            <th><i class="fa fa-user-circle me-1"></i>Usuario</th>
+                            <th><i class="fa fa-clock me-1"></i>Creado</th>
+                            <th><i class="fa fa-edit me-1"></i>Actualizado</th>
+                            <th class="text-center"><i class="fa fa-cog me-1"></i>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var tx in Model)
+                        {
+                        <tr class="transaction-row" data-type="@tx.Type" data-search="@tx.ProductId @tx.ClientName @tx.CreatedBy">
+                            <td>
+                                <span class="date-display">@tx.OccurredAt.ToString("dd/MM/yyyy")</span>
+                                <small class="d-block text-muted">@tx.OccurredAt.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                <strong class="text-primary">@tx.ProductId</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark">@tx.WarehouseId</span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(tx.ProviderId?.ToString()))
+                                    {
+                                <span class="text-success fw-medium">@tx.ProviderId</span>
+                                    }
+                                    else
+                                    {
+                                <span class="text-muted fst-italic">N/A</span>
+                                    }
+                            </td>
+                            <td class="text-center">
+                                <span class="quantity-display">@tx.Quantity</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="transaction-badge @(tx.Type == "Ingreso" ? "bg-success" : "bg-danger") text-white">
+                                    <i class="fa @(tx.Type == "Ingreso" ? "fa-arrow-up" : "fa-arrow-down") me-1"></i>
+                                    @tx.Type
+                                </span>
+                            </td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(tx.ClientName))
+                                    {
+                                <span class="fw-medium" title="@tx.ClientName">
+                                    @(tx.ClientName.Length > 20 ? tx.ClientName.Substring(0, 20) + "..." : tx.ClientName)
+                                </span>
+                                    }
+                                    else
+                                    {
+                                <span class="text-muted fst-italic">Sin cliente</span>
+                                    }
+                            </td>
+                            <td>
+                                <span class="user-badge">@tx.CreatedBy</span>
+                            </td>
+                            <td>
+                                <span class="date-display">@tx.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                <small class="d-block text-muted">@tx.CreatedAt.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                <span class="date-display">@tx.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                                <small class="d-block text-muted">@tx.UpdatedAt.ToString("HH:mm")</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center">
+                                    <a asp-action="Details" asp-route-id="@tx.Id"
+                                       class="btn btn-outline-info btn-action"
+                                       title="Ver detalles"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@tx.Id"
+                                       class="btn btn-outline-primary btn-action"
+                                       title="Editar transacción"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@tx.Id"
+                                       class="btn btn-outline-danger btn-action"
+                                       title="Eliminar transacción"
+                                       data-bs-toggle="tooltip"
+                                       onclick="return confirm('¿Está seguro de que desea eliminar esta transacción?')">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <i class="fa fa-inbox"></i>
+                    <h4>No hay transacciones</h4>
+                    <p>No se encontraron transacciones en el sistema.</p>
+                    <a asp-action="Create" class="btn btn-success">
+                        <i class="fa fa-plus me-2"></i>Crear Primera Transacción
+                    </a>
+                </div>
+            }
+            </div>
+        </div>
     </div>
+
+    <!-- JavaScript para funcionalidad -->
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Filtrado y búsqueda
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const dateFrom = document.getElementById('dateFrom');
+    const dateTo = document.getElementById('dateTo');
+    const recordCount = document.getElementById('recordCount');
+
+    function filterTransactions() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedType = typeFilter.value;
+        const fromDate = dateFrom.value ? new Date(dateFrom.value) : null;
+        const toDate = dateTo.value ? new Date(dateTo.value) : null;
+
+        const rows = document.querySelectorAll('.transaction-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const searchData = row.dataset.search.toLowerCase();
+            const type = row.dataset.type;
+
+            // Filtro de búsqueda
+            const matchesSearch = !searchTerm || searchData.includes(searchTerm);
+
+            // Filtro de tipo
+            const matchesType = !selectedType || type === selectedType;
+
+            // Mostrar/ocultar fila
+            if (matchesSearch && matchesType) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        // Actualizar contador
+        recordCount.textContent = `Mostrando ${visibleCount} transacciones`;
+    }
+
+    // Event listeners para filtros
+    if (searchInput) searchInput.addEventListener('input', filterTransactions);
+    if (typeFilter) typeFilter.addEventListener('change', filterTransactions);
+    if (dateFrom) dateFrom.addEventListener('change', filterTransactions);
+    if (dateTo) dateTo.addEventListener('change', filterTransactions);
+});
+
+function clearFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('dateFrom').value = '';
+    document.getElementById('dateTo').value = '';
+
+    // Disparar evento para actualizar filtros
+    document.getElementById('searchInput').dispatchEvent(new Event('input'));
+}
+    </script>

@@ -1,157 +1,72 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using ProyectoTestMVC.Data;
+using ProyectoTestMVC.Interfaces;
 using ProyectoTestMVC.Models;
 
 namespace ProyectoTestMVC.Controllers
 {
     public class AlertsController : Controller
     {
-        private readonly ApplicationDbContext _context;
-
-        public AlertsController(ApplicationDbContext context)
+        private readonly IAlertRepository _repo;
+        public AlertsController(IAlertRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
-        // GET: Alerts
         public async Task<IActionResult> Index()
-        {
-            return View(await _context.Alerts.ToListAsync());
-        }
+            => View(await _repo.GetAllAsync());
 
-        // GET: Alerts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var alert = await _context.Alerts
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (alert == null)
-            {
-                return NotFound();
-            }
-
-            return View(alert);
+            if (id == null) return NotFound();
+            var alert = await _repo.GetByIdAsync(id.Value);
+            return alert == null ? NotFound() : View(alert);
         }
 
-        // GET: Alerts/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
+        public IActionResult Create() => View();
 
-        // POST: Alerts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ProductId,TriggeredAt,IsNotified,Message,CreatedAt,UpdatedAt")] Alert alert)
+        public async Task<IActionResult> Create(Alert alert)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(alert);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(alert);
+            if (!ModelState.IsValid)
+                return View(alert);
+
+            await _repo.AddAsync(alert);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Alerts/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var alert = await _context.Alerts.FindAsync(id);
-            if (alert == null)
-            {
-                return NotFound();
-            }
-            return View(alert);
+            if (id == null) return NotFound();
+            var alert = await _repo.GetByIdAsync(id.Value);
+            return alert == null ? NotFound() : View(alert);
         }
 
-        // POST: Alerts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ProductId,TriggeredAt,IsNotified,Message,CreatedAt,UpdatedAt")] Alert alert)
+        public async Task<IActionResult> Edit(int id, Alert alert)
         {
-            if (id != alert.Id)
-            {
-                return NotFound();
-            }
+            if (id != alert.Id) return NotFound();
+            if (!ModelState.IsValid)
+                return View(alert);
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _context.Update(alert);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!AlertExists(alert.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(alert);
+            await _repo.UpdateAsync(alert);
+            return RedirectToAction(nameof(Index));
         }
 
-        // GET: Alerts/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var alert = await _context.Alerts
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (alert == null)
-            {
-                return NotFound();
-            }
-
-            return View(alert);
+            if (id == null) return NotFound();
+            var alert = await _repo.GetByIdAsync(id.Value);
+            return alert == null ? NotFound() : View(alert);
         }
 
-        // POST: Alerts/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var alert = await _context.Alerts.FindAsync(id);
-            if (alert != null)
-            {
-                _context.Alerts.Remove(alert);
-            }
-
-            await _context.SaveChangesAsync();
+            await _repo.DeleteAsync(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool AlertExists(int id)
-        {
-            return _context.Alerts.Any(e => e.Id == id);
         }
     }
 }

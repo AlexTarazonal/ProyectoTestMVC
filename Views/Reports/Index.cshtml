@@ -1,60 +1,619 @@
-@model IEnumerable<ProyectoTestMVC.Models.Report>
-
-    @{
+锘緻{
     ViewData["Title"] = "Reportes";
+
+    // Datos ficticios para demostraci贸n
+    var reports = new List<dynamic> {
+        new { Id = 1, TransactionId = "TXN-2024-001", GeneratedAt = DateTime.Now.AddHours(-2), Format = "PDF", CreatedAt = DateTime.Now.AddDays(-1) },
+        new { Id = 2, TransactionId = "TXN-2024-002", GeneratedAt = DateTime.Now.AddHours(-5), Format = "Excel", CreatedAt = DateTime.Now.AddDays(-2) },
+        new { Id = 3, TransactionId = "TXN-2024-003", GeneratedAt = DateTime.Now.AddHours(-8), Format = "CSV", CreatedAt = DateTime.Now.AddDays(-3) },
+        new { Id = 4, TransactionId = "TXN-2024-004", GeneratedAt = DateTime.Now.AddDays(-1), Format = "PDF", CreatedAt = DateTime.Now.AddDays(-4) },
+        new { Id = 5, TransactionId = "TXN-2024-005", GeneratedAt = DateTime.Now.AddDays(-2), Format = "JSON", CreatedAt = DateTime.Now.AddDays(-5) },
+        new { Id = 6, TransactionId = "TXN-2024-006", GeneratedAt = DateTime.Now.AddDays(-3), Format = "Excel", CreatedAt = DateTime.Now.AddDays(-6) },
+        new { Id = 7, TransactionId = "TXN-2024-007", GeneratedAt = DateTime.Now.AddDays(-4), Format = "PDF", CreatedAt = DateTime.Now.AddDays(-7) },
+        new { Id = 8, TransactionId = "TXN-2024-008", GeneratedAt = DateTime.Now.AddDays(-5), Format = "CSV", CreatedAt = DateTime.Now.AddDays(-8) }
+    };
+}
+
+<style>
+    .reports-container {
+        background: linear-gradient(135deg, #2980b9 0%, #8e44ad 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Reportes</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fa fa-plus me-1"></i> Nuevo Reporte
-            </a>
-        </div>
+    .main-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 25px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Transacci髇</th>
-                                <th>Generado</th>
-                                <th>Formato</th>
-                                <th>Creado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var rpt in Model)
-                        {
-                            <tr>
-                                <td>@rpt.TransactionId</td>
-                                <td>@rpt.GeneratedAt.ToString("g")</td>
-                                <td>
-                                    <span class="badge bg-secondary text-uppercase">
-                                        @rpt.Format
-                                    </span>
-                                </td>
-                                <td>@rpt.CreatedAt.ToString("g")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit" asp-route-id="@rpt.Id" class="btn btn-outline-primary" title="Editar">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@rpt.Id" class="btn btn-outline-info" title="Ver">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@rpt.Id" class="btn btn-outline-danger" title="Eliminar">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+        .main-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.2);
+        }
+
+    .header-section {
+        background: linear-gradient(135deg, #3498db 0%, #9b59b6 100%);
+        color: white;
+        padding: 3rem 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 8s linear infinite;
+        }
+
+        .header-section::after {
+            content: '馃搳';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 4rem;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+    @@keyframes rotate {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 4px 25px rgba(52, 152, 219, 0.5);
+        }
+
+        100% {
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+    }
+
+    @@keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .header-title {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+        text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-icon {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 15px;
+        border-radius: 50%;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-new-report {
+        background: linear-gradient(45deg, #27ae60, #2ecc71);
+        border: none;
+        border-radius: 50px;
+        padding: 15px 30px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        transition: all 0.4s ease;
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.3);
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+    }
+
+        .btn-new-report::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-new-report:hover::before {
+            left: 100%;
+        }
+
+        .btn-new-report:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(39, 174, 96, 0.4);
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }
+
+    .stats-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-color: #3498db;
+        }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(45deg, #3498db, #9b59b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .table-container {
+        margin: 2rem;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+
+    .custom-table {
+        margin: 0;
+        background: white;
+    }
+
+        .custom-table thead {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+        }
+
+            .custom-table thead th {
+                border: none;
+                padding: 1.5rem 1.2rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                font-size: 0.9rem;
+                position: relative;
+            }
+
+                .custom-table thead th::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    width: 0;
+                    height: 3px;
+                    background: linear-gradient(45deg, #3498db, #9b59b6);
+                    transition: all 0.3s ease;
+                    transform: translateX(-50%);
+                }
+
+                .custom-table thead th:hover::after {
+                    width: 80%;
+                }
+
+        .custom-table tbody tr {
+            transition: all 0.4s ease;
+            border: none;
+            animation: slideIn 0.5s ease;
+        }
+
+            .custom-table tbody tr:hover {
+                background: linear-gradient(135deg, rgba(52, 152, 219, 0.05) 0%, rgba(155, 89, 182, 0.05) 100%);
+                transform: scale(1.02);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            }
+
+        .custom-table tbody td {
+            padding: 1.5rem 1.2rem;
+            border: none;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+    .transaction-id {
+        font-family: 'Courier New', monospace;
+        background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+        padding: 8px 16px;
+        border-radius: 25px;
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-block;
+        border: 2px solid #95a5a6;
+        transition: all 0.3s ease;
+    }
+
+        .transaction-id:hover {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            transform: scale(1.05);
+        }
+
+    .format-badge {
+        padding: 10px 18px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .format-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .format-badge:hover::before {
+            left: 100%;
+        }
+
+    .format-pdf {
+        background: linear-gradient(45deg, #e74c3c, #c0392b);
+        color: white;
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+    }
+
+    .format-excel {
+        background: linear-gradient(45deg, #27ae60, #229954);
+        color: white;
+        box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+    }
+
+    .format-csv {
+        background: linear-gradient(45deg, #f39c12, #e67e22);
+        color: white;
+        box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+    }
+
+    .format-json {
+        background: linear-gradient(45deg, #9b59b6, #8e44ad);
+        color: white;
+        box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3);
+    }
+
+    .format-badge:hover {
+        transform: translateY(-2px) scale(1.1);
+    }
+
+    .date-time {
+        color: #5a6c7d;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .date-highlight {
+        color: #3498db;
+        font-weight: 700;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid;
+        transition: all 0.4s ease;
+        text-decoration: none;
+        font-size: 1.1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.3s ease;
+        }
+
+        .action-btn:hover::before {
+            transform: scale(1);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px) scale(1.1);
+            color: white !important;
+        }
+
+    .btn-edit {
+        border-color: #3498db;
+        color: #3498db;
+    }
+
+        .btn-edit::before {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        .btn-edit:hover {
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+        }
+
+    .btn-view {
+        border-color: #17a2b8;
+        color: #17a2b8;
+    }
+
+        .btn-view::before {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+        }
+
+        .btn-view:hover {
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+        }
+
+    .btn-delete {
+        border-color: #e74c3c;
+        color: #e74c3c;
+    }
+
+        .btn-delete::before {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .btn-delete:hover {
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.4);
+        }
+
+    .icon-3d {
+        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+    }
+</style>
+
+<div class="reports-container">
+    <div class="container">
+        <div class="main-card">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="header-title">
+                        <div class="header-icon">
+                            <i class="fa fa-chart-bar icon-3d"></i>
+                        </div>
+                        <div>
+                            <div>Gesti贸n de Reportes</div>
+                            <small style="font-size: 1rem; opacity: 0.8; font-weight: 400;">
+                                Sistema de An谩lisis y Documentaci贸n
+                            </small>
+                        </div>
+                    </h1>
+                    <a asp-action="Create" class="btn btn-new-report">
+                        <i class="fa fa-plus me-2"></i>
+                        Generar Reporte
+                    </a>
                 </div>
+            </div>
+
+            <!-- Stats Section -->
+            <div class="stats-section">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">@reports.Count()</div>
+                            <div class="stat-label">
+                                <i class="fa fa-file-alt me-1"></i>
+                                Total Reportes
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">@reports.Count(r => r.Format == "PDF")</div>
+                            <div class="stat-label">
+                                <i class="fa fa-file-pdf me-1"></i>
+                                Formato PDF
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">@reports.Count(r => r.Format == "Excel")</div>
+                            <div class="stat-label">
+                                <i class="fa fa-file-excel me-1"></i>
+                                Formato Excel
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-number">@reports.Count(r => ((DateTime)r.GeneratedAt).Date == DateTime.Today)</div>
+                            <div class="stat-label">
+                                <i class="fa fa-calendar-day me-1"></i>
+                                Hoy Generados
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="table-container">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <i class="fa fa-hashtag me-2"></i>
+                                ID Transacci贸n
+                            </th>
+                            <th>
+                                <i class="fa fa-clock me-2"></i>
+                                Fecha Generaci贸n
+                            </th>
+                            <th>
+                                <i class="fa fa-file-alt me-2"></i>
+                                Formato
+                            </th>
+                            <th>
+                                <i class="fa fa-calendar-plus me-2"></i>
+                                Fecha Creaci贸n
+                            </th>
+                            <th class="text-center">
+                                <i class="fa fa-cogs me-2"></i>
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var rpt in reports)
+                        {
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 45px; height: 45px; background: linear-gradient(45deg, #3498db, #2980b9) !important;">
+                                        <i class="fa fa-file-alt text-white"></i>
+                                    </div>
+                                    <span class="transaction-id">@rpt.TransactionId</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-time">
+                                    <div class="date-highlight">
+                                        <i class="fa fa-calendar me-1"></i>
+                                        @((DateTime)rpt.GeneratedAt).ToString("dd/MM/yyyy")
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa fa-clock me-1"></i>
+                                        @((DateTime)rpt.GeneratedAt).ToString("HH:mm")
+                                    </small>
+                                </div>
+                            </td>
+                            <td>
+                                @{
+                                        var formatClass = rpt.Format.ToString().ToLower() switch {
+                                            "pdf" => "format-pdf",
+                                            "excel" => "format-excel",
+                                            "csv" => "format-csv",
+                                            "json" => "format-json",
+                                            _ => "format-pdf"
+                                        };
+
+                                        var formatIcon = rpt.Format.ToString().ToLower() switch {
+                                            "pdf" => "fa-file-pdf",
+                                            "excel" => "fa-file-excel",
+                                            "csv" => "fa-file-csv",
+                                            "json" => "fa-file-code",
+                                            _ => "fa-file"
+                                        };
+                                }
+                                <span class="format-badge @formatClass">
+                                    <i class="fa @formatIcon me-1"></i>
+                                    @rpt.Format
+                                </span>
+                            </td>
+                            <td>
+                                <div class="date-time">
+                                    <div class="date-highlight">
+                                        <i class="fa fa-calendar me-1"></i>
+                                        @((DateTime)rpt.CreatedAt).ToString("dd/MM/yyyy")
+                                    </div>
+                                    <small class="text-muted">
+                                        <i class="fa fa-clock me-1"></i>
+                                        @((DateTime)rpt.CreatedAt).ToString("HH:mm")
+                                    </small>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@rpt.Id"
+                                       class="action-btn btn-edit" title="Editar Reporte">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@rpt.Id"
+                                       class="action-btn btn-view" title="Ver Detalles">
+                                        <i class="fa fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@rpt.Id"
+                                       class="action-btn btn-delete" title="Eliminar Reporte">
+                                        <i class="fa fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+</div>

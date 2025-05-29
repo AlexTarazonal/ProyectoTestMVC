@@ -1,93 +1,475 @@
-@model IEnumerable<ProyectoTestMVC.ViewModels.ProductListViewModel>
-    @{
+﻿@{
     ViewData["Title"] = "Productos";
-    var categories = (List<ProyectoTestMVC.Models.Category>)ViewBag.Categories;
-    string? search = (string?)ViewBag.Search;
-    int? categoryId = (int?)ViewBag.CategoryId;
+
+    // Datos ficticios para demostración
+// Datos ficticios para demostración de un almacén de abarrotes
+var products = new List<dynamic> {
+    new { Id = 1, Name = "Arroz Costeño 5 kg", Barcode = "ABARRO1ARZ005", Price = 19.50m, CategoryName = "Abarrotes", TotalStock = 30, MinimumStock = 10 },
+    new { Id = 2, Name = "Azúcar Blanca 2 kg", Barcode = "ABARRO2AZU002", Price = 8.75m, CategoryName = "Abarrotes", TotalStock = 25, MinimumStock = 5 },
+    new { Id = 3, Name = "Aceite Vegetal 1 L", Barcode = "ABARRO3ACE001", Price = 12.20m, CategoryName = "Abarrotes", TotalStock = 40, MinimumStock = 15 },
+    new { Id = 4, Name = "Leche Entera en Tambo 10 L", Barcode = "ABARRO4TMB010", Price = 35.00m, CategoryName = "Lácteos", TotalStock = 5, MinimumStock = 2 },
+    new { Id = 5, Name = "Pan Francés (unidad)", Barcode = "ABARRO5PAN001", Price = 0.80m, CategoryName = "Panadería", TotalStock = 100, MinimumStock = 30 },
+    new { Id = 6, Name = "Huevos de Gallina (docena)", Barcode = "ABARRO6HUE012", Price = 10.50m, CategoryName = "Lácteos", TotalStock = 20, MinimumStock = 5 },
+    new { Id = 7, Name = "Jabón de Lavandería 250 g", Barcode = "ABARRO7JAB250", Price = 3.40m, CategoryName = "Limpieza", TotalStock = 60, MinimumStock = 20 },
+    new { Id = 8, Name = "Masa de Maíz 1 kg", Barcode = "ABARRO8MAS001", Price = 5.00m, CategoryName = "Granos", TotalStock = 18, MinimumStock = 8 },
+    new { Id = 9, Name = "Frijoles Negros 1 kg", Barcode = "ABARRO9FRJ001", Price = 9.00m, CategoryName = "Granos", TotalStock = 22, MinimumStock = 10 },
+    new { Id = 10, Name = "Café Molido 250 g", Barcode = "ABARRO10CAF250", Price = 7.80m, CategoryName = "Bebidas", TotalStock = 15, MinimumStock = 5 },
+    new { Id = 11, Name = "Galletas María 200 g", Barcode = "ABARRO11GLT200", Price = 4.20m, CategoryName = "Panadería", TotalStock = 50, MinimumStock = 20 },
+    new { Id = 12, Name = "Refresco Cola 2 L", Barcode = "ABARRO12REF002", Price = 6.50m, CategoryName = "Bebidas", TotalStock = 35, MinimumStock = 10 }
+};
+
+var categories = new List<dynamic> {
+    new { Id = 1, Name = "Abarrotes" },
+    new { Id = 2, Name = "Lácteos" },
+    new { Id = 3, Name = "Panadería" },
+    new { Id = 4, Name = "Limpieza" },
+    new { Id = 5, Name = "Granos" },
+    new { Id = 6, Name = "Bebidas" }
+};
+
+
+    string? search = "";
+    int? categoryId = null;
+}
+
+<style>
+    .products-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Listado de Productos</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="bi bi-plus-lg"></i> Nuevo Producto
-            </a>
-        </div>
+    .main-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
 
-        <div class="card mb-4 shadow-sm">
-            <div class="card-body">
-                <form method="get" class="row g-2">
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" name="search" value="@search" placeholder="Buscar..." class="form-control" />
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <select name="categoryId" class="form-select">
-                            <option value="">Todas las categor�as</option>
-                            @foreach (var cat in categories)
-                        {
-                            <option value="@cat.Id" selected="@(cat.Id == categoryId ? "selected" : null)">
-                                @cat.Name
-                            </option>
-                        }
-                        </select>
-                    </div>
-                    <div class="col-md-4 text-md-end">
-                        <button type="submit" class="btn btn-primary me-2">
-                            <i class="bi bi-funnel"></i> Filtrar
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">
-                            <i class="bi bi-arrow-clockwise"></i> Limpiar
-                        </a>
-                    </div>
-                </form>
+        .main-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+    .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: float 6s ease-in-out infinite;
+        }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+        }
+    }
+
+    .header-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-new-product {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        border: none;
+        border-radius: 50px;
+        padding: 12px 24px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        position: relative;
+        z-index: 2;
+    }
+
+        .btn-new-product:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+            background: linear-gradient(45deg, #20c997, #28a745);
+        }
+
+    .filter-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin: 2rem;
+        transition: all 0.3s ease;
+    }
+
+        .filter-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-1px);
+        }
+
+    .input-group-text {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 10px 0 0 10px;
+    }
+
+    .btn-filter {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        border: none;
+        border-radius: 50px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+        .btn-filter:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        }
+
+    .btn-clear {
+        border: 2px solid #6c757d;
+        border-radius: 50px;
+        padding: 10px 22px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: white;
+    }
+
+        .btn-clear:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    .table-container {
+        margin: 2rem;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .custom-table {
+        margin: 0;
+        background: white;
+    }
+
+        .custom-table thead {
+            background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+            color: white;
+        }
+
+            .custom-table thead th {
+                border: none;
+                padding: 1.2rem 1rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-size: 0.9rem;
+            }
+
+        .custom-table tbody tr {
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+            .custom-table tbody tr:hover {
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                transform: scale(1.01);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+        .custom-table tbody td {
+            padding: 1.2rem 1rem;
+            border: none;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+        }
+
+    .stock-badge {
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stock-success {
+        background: linear-gradient(45deg, #28a745, #20c997);
+        color: white;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .stock-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        50% {
+            box-shadow: 0 4px 25px rgba(220, 53, 69, 0.5);
+        }
+
+        100% {
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+    }
+
+    .row-danger {
+        background: linear-gradient(135deg, rgba(248, 215, 218, 0.3) 0%, rgba(242, 222, 222, 0.3) 100%) !important;
+        border-left: 4px solid #dc3545;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        font-size: 1rem;
+    }
+
+        .action-btn:hover {
+            transform: translateY(-2px) scale(1.1);
+        }
+
+    .btn-edit {
+        background: linear-gradient(45deg, #ffc107, #ff8f00);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+        .btn-edit:hover {
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+            color: white;
+        }
+
+    .btn-view {
+        background: linear-gradient(45deg, #17a2b8, #138496);
+        color: white;
+        box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+    }
+
+        .btn-view:hover {
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.4);
+            color: white;
+        }
+
+    .btn-delete {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+        .btn-delete:hover {
+            box-shadow: 0 8px 25px rgba(220, 53, 69, 0.4);
+            color: white;
+        }
+
+    .price-text {
+        font-weight: 700;
+        color: #28a745;
+        font-size: 1.1rem;
+    }
+
+    .category-tag {
+        background: linear-gradient(45deg, #6f42c1, #563d7c);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .code-text {
+        font-family: 'Courier New', monospace;
+        background: #f8f9fa;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-weight: 600;
+        color: #495057;
+    }
+</style>
+
+<div class="products-container">
+    <div class="container">
+        <div class="main-card">
+            <!-- Header Section -->
+            <div class="header-section">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h1 class="header-title">
+                        <i class="bi bi-box-seam me-3"></i>
+                        Gestión de Productos
+                    </h1>
+                    <a asp-action="Create" class="btn btn-new-product">
+                        <i class="bi bi-plus-lg me-2"></i>
+                        Nuevo Producto
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <div class="table-responsive shadow-sm">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Nombre</th>
-                        <th>C�digo</th>
-                        <th>Precio</th>
-                        <th>Categor�a</th>
-                        <th class="text-center">Stock / M�nimo</th>
-                        <th class="text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach(var p in Model)
-                {
-                    var lowStock = p.TotalStock < p.MinimumStock;
-                    <tr class="@(lowStock ? "table-danger" : "")">
-                        <td>@p.Name</td>
-                        <td>@p.Barcode</td>
-                        <td>@p.Price.ToString("C")</td>
-                        <td>@p.CategoryName</td>
-                        <td class="text-center">
-                            <span class="badge @(lowStock ? "bg-danger" : "bg-success")">
-                                @p.TotalStock / @p.MinimumStock
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm" role="group">
-                                <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-warning" title="Editar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <a asp-action="Details" asp-route-id="@p.Id" class="btn btn-info" title="Ver detalles">
-                                    <i class="bi bi-eye"></i>
-                                </a>
-                                <a asp-action="Delete" asp-route-id="@p.Id" class="btn btn-danger" title="Eliminar">
-                                    <i class="bi bi-trash"></i>
+            <!-- Filter Section -->
+            <div class="filter-card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-muted mb-2">
+                                <i class="bi bi-search me-1"></i>Buscar Producto
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" value="@search"
+                                       placeholder="Nombre, código..." class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-muted mb-2">
+                                <i class="bi bi-tags me-1"></i>Categoría
+                            </label>
+                            <select name="categoryId" class="form-select">
+                                <option value="">🏷️ Todas las categorías</option>
+                                @foreach (var cat in categories)
+                                {
+                                <option value="@cat.Id" selected="@(cat.Id == categoryId ? "selected" : null)">
+                                    @cat.Name
+                                </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="w-100 text-md-end">
+                                <button type="submit" class="btn btn-filter me-2">
+                                    <i class="bi bi-funnel me-2"></i>Filtrar
+                                </button>
+                                <a asp-action="Index" class="btn btn-clear">
+                                    <i class="bi bi-arrow-clockwise me-2"></i>Limpiar
                                 </a>
                             </div>
-                        </td>
-                    </tr>
-                }
-                </tbody>
-            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="table-container">
+                <table class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th><i class="bi bi-box me-2"></i>Producto</th>
+                            <th><i class="bi bi-upc me-2"></i>Código</th>
+                            <th><i class="bi bi-currency-dollar me-2"></i>Precio</th>
+                            <th><i class="bi bi-tags me-2"></i>Categoría</th>
+                            <th class="text-center"><i class="bi bi-archive me-2"></i>Stock</th>
+                            <th class="text-center"><i class="bi bi-gear me-2"></i>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(var p in products)
+                        {
+                            var lowStock = p.TotalStock < p.MinimumStock;
+                        <tr class="@(lowStock ? "row-danger" : "")" )>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                         style="width: 40px; height: 40px; background: linear-gradient(45deg, #667eea, #764ba2) !important;">
+                                        <i class="bi bi-box text-white"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@p.Name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="code-text">@p.Barcode</span></td>
+                            <td><span class="price-text">@p.Price.ToString("C")</span></td>
+                            <td><span class="category-tag">@p.CategoryName</span></td>
+                            <td class="text-center">
+                                <span class="stock-badge @(lowStock ? "stock-danger" : "stock-success")">
+                                    @p.TotalStock / @p.MinimumStock
+                                </span>
+                                @if(lowStock)
+                                    {
+                                <div class="mt-1">
+                                    <small class="text-danger fw-bold">
+                                        <i class="bi bi-exclamation-triangle"></i> Stock Bajo
+                                    </small>
+                                </div>
+                                    }
+                            </td>
+                            <td class="text-center">
+                                <div class="action-buttons">
+                                    <a asp-action="Edit" asp-route-id="@p.Id"
+                                       class="action-btn btn-edit" title="Editar Producto">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@p.Id"
+                                       class="action-btn btn-view" title="Ver Detalles">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@p.Id"
+                                       class="action-btn btn-delete" title="Eliminar Producto">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+</div>

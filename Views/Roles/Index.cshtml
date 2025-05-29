@@ -1,56 +1,374 @@
 @model IEnumerable<ProyectoTestMVC.Models.Role>
-
     @{
     ViewData["Title"] = "Roles";
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Roles</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fa fa-plus me-1"></i> Nuevo Rol
-            </a>
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-1 text-dark fw-bold">
+                            <i class="fas fa-user-shield text-primary me-2"></i>
+                            Gestión de Roles
+                        </h1>
+                        <p class="text-muted mb-0">Administra los roles y permisos del sistema</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary" onclick="refreshTable()">
+                            <i class="fas fa-sync-alt me-1"></i> Actualizar
+                        </button>
+                        <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="fas fa-plus me-2"></i> Crear Nuevo Rol
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Descripción</th>
-                                <th>Creado</th>
-                                <th>Actualizado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var role in Model)
-                        {
-                            <tr>
-                                <td>@role.Name</td>
-                                <td class="text-truncate" style="max-width: 250px;">@role.Description</td>
-                                <td>@role.CreatedAt.ToString("g")</td>
-                                <td>@role.UpdatedAt.ToString("g")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit" asp-route-id="@role.Id" class="btn btn-outline-primary" title="Editar">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@role.Id" class="btn btn-outline-info" title="Ver">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@role.Id" class="btn btn-outline-danger" title="Eliminar">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-gradient-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-1">Total Roles</h6>
+                                <h3 class="mb-0">@Model.Count()</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm bg-gradient-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="card-title mb-1">Roles Activos</h6>
+                                <h3 class="mb-0">@Model.Count()</h3>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0"
+                                           placeholder="Buscar roles por nombre o descripción..."
+                                           id="searchInput">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="sortBy">
+                                    <option value="name">Ordenar por Nombre</option>
+                                    <option value="created">Ordenar por Fecha Creación</option>
+                                    <option value="updated">Ordenar por Última Actualización</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                        <i class="fas fa-times"></i> Limpiar
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="exportData()">
+                                        <i class="fas fa-download"></i> Exportar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table Card -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="fas fa-list text-primary me-2"></i>
+                                Lista de Roles
+                            </h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <small class="text-muted">
+                                    Mostrando @Model.Count() roles
+                                </small>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active" onclick="toggleView('table')">
+                                        <i class="fas fa-table"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('grid')">
+                                        <i class="fas fa-th"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="rolesTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th class="border-0 ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-tag text-muted me-2"></i>
+                                                Nombre del Rol
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-align-left text-muted me-2"></i>
+                                                Descripción
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-calendar-plus text-muted me-2"></i>
+                                                Fecha Creación
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-calendar-edit text-muted me-2"></i>
+                                                Última Actualización
+                                            </div>
+                                        </th>
+                                        <th class="border-0 text-center">
+                                            <i class="fas fa-cogs text-muted me-1"></i>
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var role in Model)
+                                {
+                                    <tr class="role-row" data-role-name="@role.Name.ToLower()" data-role-desc="@role.Description?.ToLower()">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-circle bg-primary text-white me-3">
+                                                    @role.Name.First().ToString().ToUpper()
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold">@role.Name</h6>
+                                                    <small class="text-muted">ID: @role.Id</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="description-cell">
+                                                @if (!string.IsNullOrEmpty(role.Description))
+                                                {
+                                                <span class="text-truncate d-inline-block" style="max-width: 300px;"
+                                                      title="@role.Description">
+                                                    @role.Description
+                                                </span>
+                                                }
+                                                else
+                                                {
+                                                <span class="text-muted fst-italic">Sin descripción</span>
+                                                }
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium">@role.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                <small class="text-muted">@role.CreatedAt.ToString("HH:mm")</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium">@role.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                                                <small class="text-muted">@role.UpdatedAt.ToString("HH:mm")</small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                                        type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                                    <li>
+                                                        <a class="dropdown-item" asp-action="Details" asp-route-id="@role.Id">
+                                                            <i class="fas fa-eye text-info me-2"></i>
+                                                            Ver Detalles
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" asp-action="Edit" asp-route-id="@role.Id">
+                                                            <i class="fas fa-edit text-warning me-2"></i>
+                                                            Editar Rol
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@role.Id"
+                                                           onclick="return confirm('¿Estás seguro de que deseas eliminar este rol?')">
+                                                            <i class="fas fa-trash me-2"></i>
+                                                            Eliminar Rol
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-users fa-3x text-muted"></i>
+                            </div>
+                            <h5 class="text-muted">No hay roles registrados</h5>
+                            <p class="text-muted mb-4">Comienza creando tu primer rol del sistema</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Crear Primer Rol
+                            </a>
+                        </div>
+                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Custom Styles -->
+    <style>
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .avatar-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+
+        .card {
+            border-radius: 12px;
+            transition: box-shadow 0.3s ease;
+        }
+
+            .card:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+            }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .btn:hover {
+                transform: translateY(-1px);
+            }
+
+        .description-cell {
+            min-height: 20px;
+        }
+
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+    </style>
+
+    <!-- JavaScript para funcionalidad adicional -->
+    <script>
+    function refreshTable() {
+        location.reload();
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('sortBy').selectedIndex = 0;
+        filterTable();
+    }
+
+    function exportData() {
+        // Implementar exportación a CSV/Excel
+        alert('Función de exportación en desarrollo');
+    }
+
+    function toggleView(viewType) {
+        // Implementar cambio entre vista tabla y grid
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.btn').classList.add('active');
+    }
+
+    // Búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('input', function() {
+        filterTable();
+    });
+
+    function filterTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('.role-row');
+
+        rows.forEach(row => {
+            const roleName = row.dataset.roleName;
+            const roleDesc = row.dataset.roleDesc;
+
+            if (roleName.includes(searchTerm) || roleDesc.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Ordenamiento
+    document.getElementById('sortBy').addEventListener('change', function() {
+        // Implementar ordenamiento
+        console.log('Ordenar por:', this.value);
+    });
+    </script>

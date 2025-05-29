@@ -1,68 +1,539 @@
 @model IEnumerable<ProyectoTestMVC.Models.Stock>
-
     @{
     ViewData["Title"] = "Movimientos de Stock";
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Movimientos de Stock</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fa fa-plus me-1"></i> Nuevo Movimiento
-            </a>
+    <div class="container-fluid py-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="h2 mb-1 text-dark fw-bold">
+                            <i class="fas fa-boxes text-warning me-2"></i>
+                            Control de Inventario
+                        </h1>
+                        <p class="text-muted mb-0">Gestiona los movimientos y niveles de stock del almacén</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-download me-1"></i> Exportar
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="exportToExcel()">
+                                        <i class="fas fa-file-excel text-success me-2"></i>Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="exportToPDF()">
+                                        <i class="fas fa-file-pdf text-danger me-2"></i>PDF
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt me-1"></i> Actualizar
+                        </button>
+                        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+                            <i class="fas fa-plus me-2"></i> Registrar Movimiento
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Cantidad</th>
-                                <th>Creado</th>
-                                <th>Actualizado</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var stk in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <span class="fw-semibold">@stk.Quantity</span>
-                                </td>
-                                <td>@stk.CreatedAt.ToString("g")</td>
-                                <td>@stk.UpdatedAt.ToString("g")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit"
-                                           asp-route-productId="@stk.ProductId"
-                                           asp-route-warehouseId="@stk.WarehouseId"
-                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
-                                           class="btn btn-outline-primary" title="Editar">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Details"
-                                           asp-route-productId="@stk.ProductId"
-                                           asp-route-warehouseId="@stk.WarehouseId"
-                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
-                                           class="btn btn-outline-info" title="Ver">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Delete"
-                                           asp-route-productId="@stk.ProductId"
-                                           asp-route-warehouseId="@stk.WarehouseId"
-                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
-                                           class="btn btn-outline-danger" title="Eliminar">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+        <!-- Stats Dashboard -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-gradient-info text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1 opacity-90">Total Movimientos</h6>
+                                <h3 class="mb-0 fw-bold">@Model.Count()</h3>
+                                <small class="opacity-75">registros</small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clipboard-list fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-gradient-success text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1 opacity-90">Stock Total</h6>
+                                <h3 class="mb-0 fw-bold">@Model.Sum(s => s.Quantity)</h3>
+                                <small class="opacity-75">unidades</small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-cubes fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-gradient-warning text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1 opacity-90">Promedio</h6>
+                                <h3 class="mb-0 fw-bold">@(Model.Any() ? Math.Round(Model.Average(s => s.Quantity), 0) : 0)</h3>
+                                <small class="opacity-75">por movimiento</small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card border-0 shadow-sm bg-gradient-danger text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title mb-1 opacity-90">Último Mov.</h6>
+                                <h3 class="mb-0 fw-bold">@(Model.Any() ? Model.Max(s => s.CreatedAt).ToString("dd/MM") : "N/A")</h3>
+                                <small class="opacity-75">fecha reciente</small>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-clock fa-2x opacity-75"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center g-3">
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0"
+                                           placeholder="Buscar por cantidad o fecha..."
+                                           id="searchInput">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="quantityFilter">
+                                    <option value="">Todos los rangos</option>
+                                    <option value="low">Cantidad Baja (0-50)</option>
+                                    <option value="medium">Cantidad Media (51-200)</option>
+                                    <option value="high">Cantidad Alta (201+)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" id="sortBy">
+                                    <option value="quantity-desc">Mayor Cantidad</option>
+                                    <option value="quantity-asc">Menor Cantidad</option>
+                                    <option value="date-desc">Más Reciente</option>
+                                    <option value="date-asc">Más Antiguo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-outline-secondary w-100" onclick="clearAllFilters()">
+                                    <i class="fas fa-times me-1"></i> Limpiar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-semibold">
+                                <i class="fas fa-warehouse text-primary me-2"></i>
+                                Historial de Movimientos
+                            </h5>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="badge bg-light text-dark fs-6" id="recordCount">
+                                    Mostrando @Model.Count() movimientos
+                                </div>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <button type="button" class="btn btn-outline-secondary active" onclick="toggleView('table')">
+                                        <i class="fas fa-table"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('cards')">
+                                        <i class="fas fa-th-large"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="stockTable">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th class="border-0 ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-hashtag text-muted me-2"></i>
+                                                Cantidad
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-box text-muted me-2"></i>
+                                                Producto
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-warehouse text-muted me-2"></i>
+                                                Almacén
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-calendar-plus text-muted me-2"></i>
+                                                Fecha Registro
+                                            </div>
+                                        </th>
+                                        <th class="border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-calendar-edit text-muted me-2"></i>
+                                                Última Actualización
+                                            </div>
+                                        </th>
+                                        <th class="border-0 text-center">
+                                            <i class="fas fa-cogs text-muted me-1"></i>
+                                            Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var stk in Model)
+                                {
+                                    <tr class="stock-row"
+                                        data-quantity="@stk.Quantity"
+                                        data-created="@stk.CreatedAt.ToString("yyyy-MM-dd")"
+                                        data-product-id="@stk.ProductId"
+                                        data-warehouse-id="@stk.WarehouseId">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="quantity-indicator me-3
+                                                    @(stk.Quantity <= 50 ? "bg-danger" :
+                                                      stk.Quantity <= 200 ? "bg-warning" : "bg-success")">
+                                                </div>
+                                                <div>
+                                                    <h5 class="mb-0 fw-bold">@stk.Quantity</h5>
+                                                    <small class="text-muted">
+                                                        @(stk.Quantity <= 50 ? "Stock Bajo" :
+                                                          stk.Quantity <= 200 ? "Stock Medio" : "Stock Alto")
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="product-avatar bg-primary text-white me-3">
+                                                    <i class="fas fa-cube"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold">Producto</h6>
+                                                    <small class="text-muted">ID: @stk.ProductId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="warehouse-avatar bg-info text-white me-3">
+                                                    <i class="fas fa-warehouse"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 fw-semibold">Almacén</h6>
+                                                    <small class="text-muted">ID: @stk.WarehouseId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium">@stk.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @stk.CreatedAt.ToString("HH:mm")
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-medium">@stk.UpdatedAt.ToString("dd/MM/yyyy")</span>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @stk.UpdatedAt.ToString("HH:mm")
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="dropdown">
+                                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                                        type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow">
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-action="Details"
+                                                           asp-route-productId="@stk.ProductId"
+                                                           asp-route-warehouseId="@stk.WarehouseId"
+                                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")">
+                                                            <i class="fas fa-eye text-info me-2"></i>
+                                                            Ver Detalles
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item"
+                                                           asp-action="Edit"
+                                                           asp-route-productId="@stk.ProductId"
+                                                           asp-route-warehouseId="@stk.WarehouseId"
+                                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")">
+                                                            <i class="fas fa-edit text-warning me-2"></i>
+                                                            Editar Movimiento
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger"
+                                                           asp-action="Delete"
+                                                           asp-route-productId="@stk.ProductId"
+                                                           asp-route-warehouseId="@stk.WarehouseId"
+                                                           asp-route-createdAt="@stk.CreatedAt.ToString("o")"
+                                                           onclick="return confirm('¿Estás seguro de eliminar este movimiento de stock?')">
+                                                            <i class="fas fa-trash me-2"></i>
+                                                            Eliminar Movimiento
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        @if (!Model.Any())
+                    {
+                        <div class="text-center py-5">
+                            <div class="mb-3">
+                                <i class="fas fa-boxes fa-4x text-muted opacity-50"></i>
+                            </div>
+                            <h4 class="text-muted mb-2">No hay movimientos de stock</h4>
+                            <p class="text-muted mb-4">Comienza registrando el primer movimiento de inventario</p>
+                            <a asp-action="Create" class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>Registrar Primer Movimiento
+                            </a>
+                        </div>
+                    }
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Custom Styles -->
+    <style>
+        .bg-gradient-info {
+            background: linear-gradient(135deg, #17a2b8, #117a8b);
+        }
+
+        .bg-gradient-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .bg-gradient-warning {
+            background: linear-gradient(135deg, #ffc107, #d39e00);
+        }
+
+        .bg-gradient-danger {
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+        }
+
+        .quantity-indicator {
+            width: 4px;
+            height: 40px;
+            border-radius: 2px;
+        }
+
+        .product-avatar, .warehouse-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .table thead th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.5px;
+            background-color: #f8f9fa !important;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(0, 123, 255, 0.05);
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+            .card:hover {
+                box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+            }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .btn:hover {
+                transform: translateY(-1px);
+            }
+
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f8f9fa !important;
+        }
+
+        .dropdown-menu {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .dropdown-item {
+            padding: 10px 16px;
+            transition: all 0.2s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: rgba(0,123,255,0.1);
+                transform: translateX(5px);
+            }
+    </style>
+
+    <!-- JavaScript -->
+    <script>
+    function refreshData() {
+        location.reload();
+    }
+
+    function exportToExcel() {
+        alert('Exportando a Excel...');
+        // Implementar exportación a Excel
+    }
+
+    function exportToPDF() {
+        alert('Exportando a PDF...');
+        // Implementar exportación a PDF
+    }
+
+    function clearAllFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('quantityFilter').selectedIndex = 0;
+        document.getElementById('sortBy').selectedIndex = 0;
+        filterTable();
+    }
+
+    function toggleView(viewType) {
+        document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active'));
+        event.target.closest('.btn').classList.add('active');
+
+        if (viewType === 'cards') {
+            alert('Vista de tarjetas en desarrollo');
+        }
+    }
+
+    // Búsqueda en tiempo real
+    document.getElementById('searchInput').addEventListener('input', filterTable);
+    document.getElementById('quantityFilter').addEventListener('change', filterTable);
+    document.getElementById('sortBy').addEventListener('change', sortTable);
+
+    function filterTable() {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const quantityFilter = document.getElementById('quantityFilter').value;
+        const rows = document.querySelectorAll('.stock-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const quantity = parseInt(row.dataset.quantity);
+            const created = row.dataset.created;
+            const productId = row.dataset.productId;
+            const warehouseId = row.dataset.warehouseId;
+
+            // Filtro de búsqueda
+            const matchesSearch = searchTerm === '' ||
+                quantity.toString().includes(searchTerm) ||
+                created.includes(searchTerm) ||
+                productId.includes(searchTerm) ||
+                warehouseId.includes(searchTerm);
+
+            // Filtro de cantidad
+            let matchesQuantity = true;
+            if (quantityFilter === 'low') matchesQuantity = quantity <= 50;
+            else if (quantityFilter === 'medium') matchesQuantity = quantity > 50 && quantity <= 200;
+            else if (quantityFilter === 'high') matchesQuantity = quantity > 200;
+
+            if (matchesSearch && matchesQuantity) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('recordCount').textContent = `Mostrando ${visibleCount} movimientos`;
+    }
+
+    function sortTable() {
+        const sortBy = document.getElementById('sortBy').value;
+        const tbody = document.querySelector('#stockTable tbody');
+        const rows = Array.from(tbody.querySelectorAll('.stock-row'));
+
+        rows.sort((a, b) => {
+            if (sortBy.startsWith('quantity')) {
+                const aQty = parseInt(a.dataset.quantity);
+                const bQty = parseInt(b.dataset.quantity);
+                return sortBy.endsWith('desc') ? bQty - aQty : aQty - bQty;
+            } else if (sortBy.startsWith('date')) {
+                const aDate = new Date(a.dataset.created);
+                const bDate = new Date(b.dataset.created);
+                return sortBy.endsWith('desc') ? bDate - aDate : aDate - bDate;
+            }
+        });
+
+        rows.forEach(row => tbody.appendChild(row));
+    }
+    </script>

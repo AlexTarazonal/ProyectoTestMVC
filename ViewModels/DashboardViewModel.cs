@@ -10,15 +10,16 @@ namespace ProyectoTestMVC.ViewModels
         public int TotalWarehouses { get; set; }
         public int TotalProviders { get; set; }
         public int LowStockAlerts { get; set; }
+
         public List<TransactionDto> RecentTransactions { get; set; } = new();
 
         public class TransactionDto
         {
             public DateTime OccurredAt { get; set; }
-            public string ProductName { get; set; }
-            public string WarehouseName { get; set; }
+            public string ProductName { get; set; } = string.Empty;
+            public string WarehouseName { get; set; } = string.Empty;
             public int Quantity { get; set; }
-            public string Type { get; set; }
+            public string Type { get; set; } = string.Empty;
         }
     }
 }

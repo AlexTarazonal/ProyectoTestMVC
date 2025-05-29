@@ -1,54 +1,592 @@
-@model IEnumerable<ProyectoTestMVC.Models.Category>
-
+﻿@model IEnumerable<ProyectoTestMVC.Models.Category>
     @{
-    ViewData["Title"] = "Categor�as";
+    ViewData["Title"] = "Gestión de Categorías";
     }
 
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="h3 mb-0">Categor�as</h1>
-            <a asp-action="Create" class="btn btn-success">
-                <i class="fa fa-plus me-1"></i> Nueva Categor�a
-            </a>
-        </div>
+    <style>
+        .categories-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 20px;
+            color: white;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-        <div class="card shadow-sm">
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Creada</th>
-                                <th>Actualizada</th>
-                                <th class="text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var cat in Model)
-                        {
-                            <tr>
-                                <td>@cat.Name</td>
-                                <td>@cat.CreatedAt.ToString("g")</td>
-                                <td>@cat.UpdatedAt.ToString("g")</td>
-                                <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a asp-action="Edit" asp-route-id="@cat.Id" class="btn btn-outline-primary" title="Editar">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <a asp-action="Details" asp-route-id="@cat.Id" class="btn btn-outline-info" title="Ver">
-                                            <i class="fa fa-eye"></i>
-                                        </a>
-                                        <a asp-action="Delete" asp-route-id="@cat.Id" class="btn btn-outline-danger" title="Eliminar">
-                                            <i class="fa fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                        </tbody>
-                    </table>
+            .categories-header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                right: -20%;
+                width: 300px;
+                height: 300px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+            }
+
+        .categories-card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .table-categories {
+            margin-bottom: 0;
+        }
+
+            .table-categories thead th {
+                background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+                border: none;
+                padding: 1.5rem;
+                font-weight: 700;
+                color: #2c3e50;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                position: relative;
+            }
+
+                .table-categories thead th::after {
+                    content: '';
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%);
+                }
+
+            .table-categories tbody tr {
+                border: none;
+                transition: all 0.4s ease;
+                position: relative;
+            }
+
+                .table-categories tbody tr:hover {
+                    background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+                    transform: translateY(-3px);
+                    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.15);
+                }
+
+                .table-categories tbody tr::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    height: 100%;
+                    width: 4px;
+                    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+
+                .table-categories tbody tr:hover::before {
+                    opacity: 1;
+                }
+
+            .table-categories tbody td {
+                padding: 1.5rem;
+                border: none;
+                vertical-align: middle;
+                border-bottom: 1px solid #f8f9fa;
+            }
+
+        .btn-modern {
+            border-radius: 30px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.4s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .btn-modern::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+                transition: left 0.5s;
+            }
+
+            .btn-modern:hover::before {
+                left: 100%;
+            }
+
+        .btn-primary-modern {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+            .btn-primary-modern:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+            }
+
+        .btn-action {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 3px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .btn-action::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transition: all 0.4s ease;
+                transform: translate(-50%, -50%);
+            }
+
+            .btn-action:hover::before {
+                width: 100%;
+                height: 100%;
+            }
+
+            .btn-action:hover {
+                transform: translateY(-3px) scale(1.1);
+            }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border: none;
+            color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(168, 237, 234, 0.3);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: none;
+            color: #e74c3c;
+            box-shadow: 0 4px 15px rgba(255, 154, 158, 0.3);
+        }
+
+        .category-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .category-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .category-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stats-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: linear-gradient(90deg, #ff6b6b 0%, #ee5a24 100%);
+            }
+
+            .stats-card:hover {
+                transform: translateY(-8px);
+            }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            border-radius: 30px;
+            border: 2px solid #f1f3f4;
+            padding: 1rem 1.5rem 1rem 3.5rem;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+            .search-box:focus {
+                box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+                border-color: #ff6b6b;
+                outline: none;
+            }
+
+        .search-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6c757d;
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: #dee2e6;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .date-display {
+            font-size: 0.85rem;
+            color: #6c757d;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .date-day {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .date-time {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .filter-tabs {
+            display: flex;
+            background: white;
+            border-radius: 15px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .filter-tab {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #6c757d;
+        }
+
+            .filter-tab.active {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+                color: white;
+                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            }
+    </style>
+
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="categories-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 mb-2">📂 Gestión de Categorías</h1>
+                    <p class="mb-0 opacity-75">Organiza y administra las categorías de tu inventario</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a asp-action="Create" class="btn btn-primary-modern btn-modern">
+                        <i class="fas fa-plus me-2"></i>Nueva Categoría
+                    </a>
                 </div>
             </div>
         </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview">
+            <div class="stats-card">
+                <div class="stats-number">@Model.Count()</div>
+                <div class="stats-label">Total Categorías</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">@Model.Count(c => c.CreatedAt.Date == DateTime.Today)</div>
+                <div class="stats-label">Creadas Hoy</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">@Model.Count(c => c.CreatedAt >= DateTime.Now.AddDays(-7))</div>
+                <div class="stats-label">Esta Semana</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-number">@Model.Count(c => c.UpdatedAt >= DateTime.Now.AddDays(-7))</div>
+                <div class="stats-label">Actualizadas</div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-container">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" class="search-box" placeholder="Buscar categorías por nombre..." id="searchInput">
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">Todas las Categorías</button>
+            <button class="filter-tab" data-filter="recent">Recientes</button>
+            <button class="filter-tab" data-filter="updated">Actualizadas</button>
+        </div>
+
+        <!-- Categories Table -->
+        <div class="categories-card">
+            @if (Model.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-categories">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-tag me-2"></i>Categoría</th>
+                            <th><i class="fas fa-calendar-plus me-2"></i>Fecha de Creación</th>
+                            <th><i class="fas fa-calendar-edit me-2"></i>Última Actualización</th>
+                            <th class="text-center"><i class="fas fa-cogs me-2"></i>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cat in Model)
+                        {
+                        <tr data-created="@cat.CreatedAt.ToString("yyyy-MM-dd")" data-updated="@cat.UpdatedAt.ToString("yyyy-MM-dd")">
+                            <td>
+                                <div class="category-item">
+                                    <div class="category-icon">
+                                        <i class="fas fa-folder"></i>
+                                    </div>
+                                    <div>
+                                        <div class="category-name">@cat.Name</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-display">
+                                    <div class="date-day">@cat.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                    <div class="date-time">@cat.CreatedAt.ToString("HH:mm")</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="date-display">
+                                    <div class="date-day">@cat.UpdatedAt.ToString("dd/MM/yyyy")</div>
+                                    <div class="date-time">@cat.UpdatedAt.ToString("HH:mm")</div>
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center">
+                                    <a asp-action="Edit" asp-route-id="@cat.Id"
+                                       class="btn btn-action btn-edit"
+                                       title="Editar categoría"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a asp-action="Details" asp-route-id="@cat.Id"
+                                       class="btn btn-action btn-view"
+                                       title="Ver detalles"
+                                       data-bs-toggle="tooltip">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@cat.Id"
+                                       class="btn btn-action btn-delete"
+                                       title="Eliminar categoría"
+                                       data-bs-toggle="tooltip"
+                                       onclick="return confirm('¿Estás seguro de que deseas eliminar esta categoría?')">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-folder-open"></i>
+                </div>
+                <h3 class="h4 mb-3">No hay categorías disponibles</h3>
+                <p class="mb-4">Comienza creando tu primera categoría para organizar mejor tu inventario.</p>
+                <a asp-action="Create" class="btn btn-primary-modern btn-modern">
+                    <i class="fas fa-plus me-2"></i>Crear Primera Categoría
+                </a>
+            </div>
+        }
+        </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Funcionalidad de búsqueda
+        const searchInput = document.getElementById('searchInput');
+        const tableRows = document.querySelectorAll('tbody tr');
+
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase().trim();
+
+            tableRows.forEach(row => {
+                const categoryName = row.querySelector('.category-name').textContent.toLowerCase();
+                const isVisible = categoryName.includes(searchTerm);
+                row.style.display = isVisible ? '' : 'none';
+            });
+
+            updateEmptyState();
+        });
+
+        // Funcionalidad de filtros
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        const today = new Date().toISOString().split('T')[0];
+        const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Actualizar tabs activos
+                filterTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const filter = this.getAttribute('data-filter');
+
+                tableRows.forEach(row => {
+                    const createdDate = row.getAttribute('data-created');
+                    const updatedDate = row.getAttribute('data-updated');
+                    let showRow = true;
+
+                    switch(filter) {
+                        case 'recent':
+                            showRow = createdDate >= weekAgo;
+                            break;
+                        case 'updated':
+                            showRow = updatedDate >= weekAgo;
+                            break;
+                        case 'all':
+                        default:
+                            showRow = true;
+                            break;
+                    }
+
+                    row.style.display = showRow ? '' : 'none';
+                });
+
+                // Limpiar búsqueda cuando se cambia filtro
+                searchInput.value = '';
+                updateEmptyState();
+            });
+        });
+
+        // Función para actualizar estado vacío
+        function updateEmptyState() {
+            const visibleRows = Array.from(tableRows).filter(row => row.style.display !== 'none');
+            const emptyState = document.querySelector('.empty-state');
+            const tableContainer = document.querySelector('.table-responsive');
+
+            if (visibleRows.length === 0 && tableContainer) {
+                if (!emptyState) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-state';
+                    emptyDiv.innerHTML = `
+                        <div class="empty-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h3 class="h4 mb-3">No se encontraron categorías</h3>
+                        <p class="mb-4">Intenta ajustar tu búsqueda o filtro.</p>
+                    `;
+                    tableContainer.parentNode.replaceChild(emptyDiv, tableContainer);
+                }
+            } else if (visibleRows.length > 0 && !tableContainer) {
+                location.reload(); // Recargar para mostrar la tabla nuevamente
+            }
+        }
+
+        // Animaciones de entrada
+        const cards = document.querySelectorAll('.stats-card, .categories-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+    </script>
